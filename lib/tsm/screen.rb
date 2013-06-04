@@ -2,49 +2,6 @@ require 'tsm/screen_attribute'
 
 module TSM
   module Bindings
-
-    # class Screen < ::FFI::Struct
-    #   layout :ref,       :size_t,
-    #          :llog,      :log_submit_callback,
-    #          :llog_data, :pointer,
-    #          :opts,      :uint,
-    #          :flags,     :uint,
-    #          :timer,     :pointer, # shl_timer
-
-    #          # default attributes few new cells
-    #          :def_attr, FFI::ScreenAttribute,
-
-    #          # current buffer
-    #          :size_x,        :uint,
-    #          :size_y,        :uint,
-    #          :margin_top,    :uint,
-    #          :margin_bottom, :uint,
-    #          :line_num,      :uint,
-    #          :lines,         :pointer, # array of lines
-    #          :main_lines,    :pointer, # array of lines
-    #          :alt_lines,     :pointer, # array of lines
-
-    #          # scroll-back buffer
-    #          :sb_count,   :uint,
-    #          :sb_first,   FFI::Line.by_ref,
-    #          :sb_last,    FFI::Line.by_ref,
-    #          :sb_max,     :uint,
-    #          :sb_pos,     FFI::Line.by_ref,
-    #          :sb_last_id, :uint64,
-
-    #          # cursor
-    #          :cursor_x, :uint,
-    #          :cursor_y, :uint,
-
-    #          # tab ruler
-    #          :tab_ruler, :pointer, # bool
-
-    #          # selection
-    #          :sel_active, :bool,
-    #          :sel_start,  FFI::SelectionPos,
-    #          :sel_end,    FFI::SelectionPos
-    # end
-
     callback :screen_prepare_callback, [:pointer, :pointer], :int
     callback :screen_draw_callback, [:pointer, :uint32, :pointer, :size_t,
                                      :uint, :uint, :uint,

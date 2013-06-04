@@ -145,15 +145,3 @@ module TSM
     end
   end
 end
-
-# screen = TSM::Screen.new(100, 50)
-# vte = TSM::Vte.new(screen)
-# vte.feed('jola')
-# screen.cursor_visible?
-
-# terminal = TSM::Terminal.new(100, 50)
-# terminal.feed('jola')
-# terminal.cursor_visible?
-# terminal.cursor_x
-# terminal.cursor_y
-# terminal[0][0].char
