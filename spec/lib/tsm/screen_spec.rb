@@ -118,30 +118,5 @@ module TSM
         it { should be(false) }
       end
     end
-
-    describe '#draw' do
-      let(:out) { [] }
-
-      before do
-        screen.draw do |x, y, char, attr|
-          out[y] ||= []
-          out[y][x] = [char, attr]
-        end
-      end
-
-      it 'draws all lines' do
-        expect(out.compact.size).to eq(10)
-      end
-
-      it 'draws all columns' do
-        expect(out[0].compact.size).to eq(20)
-      end
-
-      it 'draws a character with the text attributes' do
-        cell = out[0][0]
-        expect(cell.first).to be_kind_of(String)
-        expect(cell.last).to be_kind_of(ScreenAttribute)
-      end
-    end
   end
 end

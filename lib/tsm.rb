@@ -13,3 +13,4 @@ module TSM
 end
 
 require 'tsm/screen'
+require 'tsm/vte'

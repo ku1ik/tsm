@@ -1,11 +1,11 @@
 require 'tsm/screen_attribute'
+require 'tsm/screen_line'
 
 module TSM
   module Bindings
     callback :screen_prepare_callback, [:pointer, :pointer], :int
     callback :screen_draw_callback, [:pointer, :uint32, :pointer, :size_t,
-                                     :uint, :uint, :uint,
-                                     ScreenAttribute.by_ref, :pointer],
+                                     :uint, :uint, :uint, :pointer, :pointer],
                                      :int
     callback :screen_render_callback, [:pointer, :pointer], :int
 
@@ -39,6 +39,10 @@ module TSM
     # void tsm_screen_move_right(struct tsm_screen *con, unsigned int num);
     attach_function :tsm_screen_move_right, [:pointer, :uint], :void
 
+    # void tsm_screen_write(struct tsm_screen *con, tsm_symbol_t ch,
+    #           const struct tsm_screen_attr *attr);
+    attach_function :tsm_screen_write, [:pointer, :uint32, :pointer], :void
+
     # void tsm_screen_draw(struct tsm_screen *con,
     #          tsm_screen_prepare_cb prepare_cb,
     #          tsm_screen_draw_cb draw_cb,
@@ -57,6 +61,8 @@ module TSM
     FLAG_HIDE_CURSOR = 0x10
     FLAG_FIXED_POS   = 0x20
     FLAG_ALTERNATE   = 0x40
+
+    attr_reader :pointer
 
     def initialize(width, height)
       create_screen
@@ -103,27 +109,51 @@ module TSM
       flags & FLAG_HIDE_CURSOR == 0
     end
 
+    def write(char, attribute)
+      call(:write, char.ord, attribute.pointer)
+    end
+
     def draw(&block)
-      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, screen_attr, data|
+      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr, data|
+        attr = ScreenAttribute.new(attr)
         char = ch_ptr.read_string
-        yield(posx, posy, char, screen_attr)
+        yield(posx, posy, char, attr)
         0
       end
 
       call(:draw, nil, callback, nil, nil)
     end
 
+    def snapshot
+      snapshot = []
+
+      line_no = -1
+      line = nil
+
+      draw do |x, y, char, attr|
+        if y != line_no
+          line_no = y
+          line = ScreenLine.new
+          snapshot << line
+        end
+
+        line << [attr, char]
+      end
+
+      snapshot
+    end
+
     private
 
     def create_screen
-      screen_ptr = ::FFI::MemoryPointer.new(:pointer)
+      screen_ptr = FFI::MemoryPointer.new(:pointer)
       ret = TSM::Bindings.tsm_screen_new(screen_ptr, nil, nil)
       raise "Couldn't create screen" unless ret.zero?
       @pointer = screen_ptr.get_pointer(0)
     end
 
     def call(function, *args)
-      TSM::Bindings.public_send(:"tsm_screen_#{function}", @pointer, *args)
+      TSM::Bindings.public_send(:"tsm_screen_#{function}", pointer, *args)
     end
   end
 
