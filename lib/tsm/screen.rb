@@ -1,28 +1,19 @@
 require 'tsm/screen_attribute'
-require 'tsm/screen_line'
 
 module TSM
   module Bindings
     callback :screen_prepare_callback, [:pointer, :pointer], :int
     callback :screen_draw_callback, [:pointer, :uint32, :pointer, :size_t,
-                                     :uint, :uint, :uint, :pointer, :pointer],
+                                     :uint, :uint, :uint,
+                                     ScreenAttributeStruct.by_ref, :pointer],
                                      :int
     callback :screen_render_callback, [:pointer, :pointer], :int
 
     # int tsm_screen_new(struct tsm_screen **out, tsm_log_t log, void *log_data);
     attach_function :tsm_screen_new, [:pointer, :pointer, :pointer], :int
 
-    # unsigned int tsm_screen_get_width(struct tsm_screen *con);
-    attach_function :tsm_screen_get_width, [:pointer], :uint
-
-    # unsigned int tsm_screen_get_height(struct tsm_screen *con);
-    attach_function :tsm_screen_get_height, [:pointer], :uint
-
     # int tsm_screen_resize(struct tsm_screen *con, unsigned int x, unsigned int y);
     attach_function :tsm_screen_resize, [:pointer, :uint, :uint], :int
-
-    # void tsm_screen_set_flags(struct tsm_screen *con, unsigned int flags);
-    attach_function :tsm_screen_set_flags, [:pointer, :uint], :void
 
     # unsigned int tsm_screen_get_flags(struct tsm_screen *con);
     attach_function :tsm_screen_get_flags, [:pointer], :uint
@@ -32,16 +23,6 @@ module TSM
 
     # unsigned int tsm_screen_get_cursor_y(struct tsm_screen *con);
     attach_function :tsm_screen_get_cursor_y, [:pointer], :uint
-
-    # void tsm_screen_move_left(struct tsm_screen *con, unsigned int num);
-    attach_function :tsm_screen_move_left, [:pointer, :uint], :void
-
-    # void tsm_screen_move_right(struct tsm_screen *con, unsigned int num);
-    attach_function :tsm_screen_move_right, [:pointer, :uint], :void
-
-    # void tsm_screen_write(struct tsm_screen *con, tsm_symbol_t ch,
-    #           const struct tsm_screen_attr *attr);
-    attach_function :tsm_screen_write, [:pointer, :uint32, :pointer], :void
 
     # void tsm_screen_draw(struct tsm_screen *con,
     #          tsm_screen_prepare_cb prepare_cb,
@@ -54,31 +35,13 @@ module TSM
   end
 
   class Screen
-    FLAG_INSERT_MODE = 0x01
-    FLAG_AUTO_WRAP   = 0x02
-    FLAG_REL_ORIGIN  = 0x04
-    FLAG_INVERSE     = 0x08
     FLAG_HIDE_CURSOR = 0x10
-    FLAG_FIXED_POS   = 0x20
-    FLAG_ALTERNATE   = 0x40
 
     attr_reader :pointer
 
     def initialize(width, height)
       create_screen
       resize(width, height)
-    end
-
-    def width
-      call(:get_width)
-    end
-
-    def height
-      call(:get_height)
-    end
-
-    def resize(width, height)
-      call(:resize, width, height)
     end
 
     def cursor_x
@@ -89,39 +52,8 @@ module TSM
       call(:get_cursor_y)
     end
 
-    def move_cursor_left(n = 1)
-      call(:move_left, n)
-    end
-
-    def move_cursor_right(n = 1)
-      call(:move_right, n)
-    end
-
-    def flags
-      call(:get_flags)
-    end
-
-    def flags=(flags)
-      call(:set_flags, flags)
-    end
-
     def cursor_visible?
       flags & FLAG_HIDE_CURSOR == 0
-    end
-
-    def write(char, attribute)
-      call(:write, char.ord, attribute.pointer)
-    end
-
-    def draw(&block)
-      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr, data|
-        attr = ScreenAttribute.new(attr)
-        char = ch_ptr.read_string
-        yield(posx, posy, char, attr)
-        0
-      end
-
-      call(:draw, nil, callback, nil, nil)
     end
 
     def snapshot
@@ -133,7 +65,7 @@ module TSM
       draw do |x, y, char, attr|
         if y != line_no
           line_no = y
-          line = ScreenLine.new
+          line = []
           snapshot << line
         end
 
@@ -154,6 +86,25 @@ module TSM
 
     def call(function, *args)
       TSM::Bindings.public_send(:"tsm_screen_#{function}", pointer, *args)
+    end
+
+    def resize(width, height)
+      call(:resize, width, height)
+    end
+
+    def flags
+      call(:get_flags)
+    end
+
+    def draw(&block)
+      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr_struct, data|
+        char = ch_ptr.read_string
+        attr = ScreenAttribute.new(attr_struct)
+        yield(posx, posy, char, attr)
+        0
+      end
+
+      call(:draw, nil, callback, nil, nil)
     end
   end
 
