@@ -1,11 +1,6 @@
 module TSM
 
-  class ScreenAttribute < FFI::Struct
-    FLAG_BOLD      = 1
-    FLAG_UNDERLINE = 2
-    FLAG_INVERSE   = 4
-    FLAG_PROTECT   = 8
-
+  class ScreenAttributeStruct < FFI::Struct
     layout :fccode, :int8,
            :bccode, :int8,
            :fr,     :uint8,
@@ -15,25 +10,31 @@ module TSM
            :bg,     :uint8,
            :bb,     :uint8,
            :flags,  :uint # bold, underline, inverse, protect (1 bit each)
+  end
 
-    def fg
-      self[:fccode]
-    end
+  class ScreenAttribute
+    FLAG_BOLD      = 1
+    FLAG_UNDERLINE = 2
+    FLAG_INVERSE   = 4
 
-    def bg
-      self[:bccode]
+    attr_reader :fg, :bg, :flags
+
+    def initialize(struct)
+      @fg = struct[:fccode]
+      @bg = struct[:bccode]
+      @flags = struct[:flags]
     end
 
     def bold?
-      self[:flags] & FLAG_BOLD == FLAG_BOLD
+      flags & FLAG_BOLD == FLAG_BOLD
     end
 
     def underline?
-      self[:flags] & FLAG_UNDERLINE == FLAG_UNDERLINE
+      flags & FLAG_UNDERLINE == FLAG_UNDERLINE
     end
 
     def inverse?
-      self[:flags] & FLAG_INVERSE == FLAG_INVERSE
+      flags & FLAG_INVERSE == FLAG_INVERSE
     end
 
     def ==(other)
@@ -46,13 +47,12 @@ module TSM
 
     def as_json(*)
       {
-        :fg        => self[:fccode],
-        :bg        => self[:bccode],
+        :fg        => fg,
+        :bg        => bg,
         :bold      => bold?,
         :underline => underline?,
         :inverse   => inverse?
       }
     end
   end
-
 end
