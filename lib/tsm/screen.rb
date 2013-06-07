@@ -1,4 +1,6 @@
 require 'tsm/screen_attribute'
+require 'tsm/screen_snapshot'
+require 'tsm/screen_line'
 
 module TSM
   module Bindings
@@ -57,7 +59,7 @@ module TSM
     end
 
     def snapshot
-      snapshot = []
+      snapshot = ScreenSnapshot.new
 
       line_no = -1
       line = nil
@@ -65,7 +67,7 @@ module TSM
       draw do |x, y, char, attr|
         if y != line_no
           line_no = y
-          line = []
+          line = ScreenLine.new
           snapshot << line
         end
 
