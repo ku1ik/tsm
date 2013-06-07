@@ -20,7 +20,13 @@ module TSM
     end
 
     def to_s
-      cells.map { |cell| cell.last }.join('')
+      cells.map { |cell| prepare_character(cell.last) }.join('')
+    end
+
+    private
+
+    def prepare_character(ch)
+      ch == '' ? ' ' : ch
     end
   end
 end

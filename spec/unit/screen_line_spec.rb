@@ -36,11 +36,11 @@ module TSM
 
       before do
         line << [nil, 'x']
-        line << [nil, 'y']
+        line << [nil, '']
         line << [nil, 'z']
       end
 
-      it { should eq('xyz') }
+      it { should eq('x z') }
     end
   end
 end
