@@ -21,7 +21,7 @@ module TSM
     end
 
     def input(data)
-      mem_buf = FFI::MemoryPointer.new(:char, data.size)
+      mem_buf = FFI::MemoryPointer.new(:char, data.bytesize)
       mem_buf.put_bytes(0, data)
       call(:input, mem_buf, data.size)
     end
