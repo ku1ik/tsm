@@ -7,7 +7,7 @@ module TSM
     let(:snapshot) { screen.snapshot }
     let(:output) { snapshot.to_s }
 
-    describe 'with just a text' do
+    describe 'with a string' do
       specify do
         vte.input("foo bar")
 
@@ -17,7 +17,17 @@ module TSM
       end
     end
 
-    describe 'with just a text.. and the again' do
+    describe 'with an array' do
+      specify do
+        vte.input([102, 111, 111])
+
+        expect(output[0..2]).to eq("foo")
+        expect(screen.cursor_x).to eq(3)
+        expect(screen.cursor_y).to eq(0)
+      end
+    end
+
+    describe 'with a string ... and then again' do
       specify do
         vte.input("foo bar")
         vte.input("baz")

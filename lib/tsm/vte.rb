@@ -21,9 +21,16 @@ module TSM
     end
 
     def input(data)
-      mem_buf = FFI::MemoryPointer.new(:char, data.bytesize)
+      if data.is_a?(Array)
+        size = data.size
+        data = data.pack('C*').force_encoding('utf-8')
+      else
+        size = data.bytesize
+      end
+
+      mem_buf = FFI::MemoryPointer.new(:char, size)
       mem_buf.put_bytes(0, data)
-      call(:input, mem_buf, data.size)
+      call(:input, mem_buf, size)
     end
 
     private
