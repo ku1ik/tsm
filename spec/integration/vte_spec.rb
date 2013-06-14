@@ -47,5 +47,27 @@ module TSM
         expect(screen.cursor_y).to eq(1)
       end
     end
+
+    describe 'with hard space' do
+      specify do
+        pending 'TODO: check with kmscon guys why does it work like it should'
+
+        vte.input("+\xa0+")
+
+        expect(output[0..2]).to eq("+ +")
+        expect(screen.cursor_x).to eq(3)
+        expect(screen.cursor_y).to eq(0)
+      end
+    end
+
+    describe 'with text longer than screen width' do
+      specify do
+        vte.input("abcdefghijklmnopqrs")
+
+        expect(output.lines.take(2)).to eq(["abcdefghij\n", "klmnopqrs \n"])
+        expect(screen.cursor_x).to eq(9)
+        expect(screen.cursor_y).to eq(1)
+      end
+    end
   end
 end
