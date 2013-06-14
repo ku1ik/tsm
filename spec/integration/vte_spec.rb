@@ -69,5 +69,15 @@ module TSM
         expect(screen.cursor_y).to eq(1)
       end
     end
+
+    describe 'with sophisticated unicode character' do
+      specify do
+        vte.input("foo\xe2\x94\x8cbar")
+
+        expect(output.lines.first).to eq("foo┌bar   \n")
+        expect(screen.cursor_x).to eq(7)
+        expect(screen.cursor_y).to eq(0)
+      end
+    end
   end
 end
