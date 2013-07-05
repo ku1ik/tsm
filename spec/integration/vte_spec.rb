@@ -60,7 +60,7 @@ module TSM
 
     describe 'with hard space' do
       specify do
-        pending 'TODO: check with kmscon guys why does it work like it should'
+        pending "TODO: check with kmscon guys why doesn't it work like it should"
 
         vte.input("+\xa0+")
 
