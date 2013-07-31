@@ -33,7 +33,7 @@ module TSM
       it 'containts cells with attribute and char' do
         attr, char = snapshot[0][0]
         expect(attr).to be_kind_of(ScreenAttribute)
-        expect(char).to eq('')
+        expect(char).to eq(' ')
       end
     end
   end

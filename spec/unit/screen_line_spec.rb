@@ -36,7 +36,7 @@ module TSM
 
       before do
         line << [nil, 'x']
-        line << [nil, '']
+        line << [nil, ' ']
         line << [nil, 'z']
       end
 

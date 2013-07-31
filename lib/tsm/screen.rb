@@ -101,7 +101,7 @@ module TSM
     def draw(&block)
       callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr_struct, data|
         unicode_codepoint = ch_ptr.get_uint32(0)
-        char = unicode_codepoint == 0 ? '' : [unicode_codepoint].pack('U*')
+        char = unicode_codepoint == 0 ? ' ' : [unicode_codepoint].pack('U*')
         attr = ScreenAttribute.new(attr_struct)
         yield(posx, posy, char, attr)
         0
