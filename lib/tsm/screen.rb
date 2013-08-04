@@ -1,13 +1,11 @@
 require 'tsm/screen_attribute'
-require 'tsm/screen_snapshot'
-require 'tsm/screen_line'
 
 module TSM
   module Bindings
     callback :screen_prepare_callback, [:pointer, :pointer], :int
     callback :screen_draw_callback, [:pointer, :uint32, :pointer, :size_t,
                                      :uint, :uint, :uint,
-                                     ScreenAttributeStruct.by_ref, :pointer],
+                                     ScreenAttribute.by_ref, :pointer],
                                      :int
     callback :screen_render_callback, [:pointer, :pointer], :int
 
@@ -58,23 +56,16 @@ module TSM
       flags & FLAG_HIDE_CURSOR == 0
     end
 
-    def snapshot
-      snapshot = ScreenSnapshot.new
-
-      line_no = -1
-      line = nil
-
-      draw do |x, y, char, attr|
-        if y != line_no
-          line_no = y
-          line = ScreenLine.new
-          snapshot << line
-        end
-
-        line << [attr, char]
+    def draw(&block)
+      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr_struct, data|
+        unicode_codepoint = ch_ptr.get_uint32(0)
+        char = unicode_codepoint == 0 ? ' ' : [unicode_codepoint].pack('U*')
+        attr = attr_struct.to_h
+        yield(posx, posy, char, attr)
+        0
       end
 
-      snapshot
+      call(:draw, nil, callback, nil, nil)
     end
 
     private
@@ -96,18 +87,6 @@ module TSM
 
     def flags
       call(:get_flags)
-    end
-
-    def draw(&block)
-      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr_struct, data|
-        unicode_codepoint = ch_ptr.get_uint32(0)
-        char = unicode_codepoint == 0 ? ' ' : [unicode_codepoint].pack('U*')
-        attr = ScreenAttribute.new(attr_struct)
-        yield(posx, posy, char, attr)
-        0
-      end
-
-      call(:draw, nil, callback, nil, nil)
     end
   end
 

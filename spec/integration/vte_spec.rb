@@ -2,10 +2,25 @@ require 'spec_helper'
 
 module TSM
   describe 'Feeding Vte' do
+    def snapshot(screen)
+      snapshot = ''
+      line_no = 0
+
+      screen.draw do |x, y, char, attr|
+        if y != line_no
+          line_no = y
+          snapshot << "\n"
+        end
+
+        snapshot << char
+      end
+
+      snapshot
+    end
+
     let(:screen) { Screen.new(10, 3) }
     let(:vte) { Vte.new(screen) }
-    let(:snapshot) { screen.snapshot }
-    let(:output) { snapshot.to_s }
+    let(:output) { snapshot(screen) }
 
     describe 'with a string' do
       specify do
@@ -38,7 +53,7 @@ module TSM
       end
     end
 
-    describe 'with carriage return' do
+    describe 'with the carriage return' do
       specify do
         vte.input("foo\rbar")
 
@@ -48,7 +63,7 @@ module TSM
       end
     end
 
-    describe 'with new line character' do
+    describe 'with the new line character' do
       specify do
         vte.input("foo\nbar")
 
@@ -70,7 +85,7 @@ module TSM
       end
     end
 
-    describe 'with text longer than screen width' do
+    describe 'with a text longer than screen width' do
       specify do
         vte.input("abcdefghijklmnopqrs")
 
@@ -80,7 +95,7 @@ module TSM
       end
     end
 
-    describe 'with sophisticated unicode character' do
+    describe 'with a sophisticated unicode character' do
       specify do
         vte.input("foo\xe2\x94\x8cbar")
 
