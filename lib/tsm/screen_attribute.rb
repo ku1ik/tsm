@@ -4,6 +4,7 @@ module TSM
     FLAG_BOLD      = 1
     FLAG_UNDERLINE = 2
     FLAG_INVERSE   = 4
+    RGB_LEVELS = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
 
     layout :fccode, :int8,
            :bccode, :int8,
@@ -35,6 +36,8 @@ module TSM
       code = self[:fccode]
 
       case code
+      when -1
+        color_from_rgb(self[:fr], self[:fg], self[:fb])
       when 0..15
         code
       else
@@ -46,6 +49,8 @@ module TSM
       code = self[:bccode]
 
       case code
+      when -1
+        color_from_rgb(self[:br], self[:bg], self[:bb])
       when 0..15
         code
       else
@@ -63,6 +68,14 @@ module TSM
 
     def inverse?
       flags & FLAG_INVERSE == FLAG_INVERSE
+    end
+
+    def color_from_rgb(r, g, b)
+      if r == g && g == b && (r - 8) % 10 == 0
+        232 + (r - 8) / 10
+      else
+        16 + RGB_LEVELS.index(r) * 36 + RGB_LEVELS.index(g) * 6 + RGB_LEVELS.index(b)
+      end
     end
   end
 

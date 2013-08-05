@@ -2,6 +2,17 @@ require 'spec_helper'
 
 module TSM
   describe 'Feeding Vte' do
+    def color_snapshot(screen)
+      lines = []
+
+      screen.draw do |x, y, char, attr|
+        line = lines[y] ||= []
+        line[x] = [char, attr]
+      end
+
+      lines
+    end
+
     def snapshot(screen)
       snapshot = ''
       line_no = 0
@@ -21,6 +32,7 @@ module TSM
     let(:screen) { Screen.new(10, 3) }
     let(:vte) { Vte.new(screen) }
     let(:output) { snapshot(screen) }
+    let(:color_output) { color_snapshot(screen) }
 
     describe 'with a string' do
       specify do
@@ -102,6 +114,38 @@ module TSM
         expect(output.lines.first).to eq("foo┌bar   \n")
         expect(screen.cursor_x).to eq(7)
         expect(screen.cursor_y).to eq(0)
+      end
+    end
+
+    describe 'with a 256-color mode foreground color' do
+      subject { color_output[0][0][1][:fg] }
+
+      before do
+        vte.input("\x1b[38;5;#{color_code}mX")
+      end
+
+      (1..255).each do |n|
+        context "of value #{n}" do
+          let(:color_code) { n }
+
+          it { should eq(n) }
+        end
+      end
+    end
+
+    describe 'with a 256-color mode background color' do
+      subject { color_output[0][0][1][:bg] }
+
+      before do
+        vte.input("\x1b[48;5;#{color_code}mX")
+      end
+
+      (1..255).each do |n|
+        context "of value #{n}" do
+          let(:color_code) { n }
+
+          it { should eq(n) }
+        end
       end
     end
   end
