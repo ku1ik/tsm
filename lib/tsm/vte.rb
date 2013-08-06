@@ -15,14 +15,6 @@ module TSM
     attach_function :tsm_vte_unref, [:pointer], :void
   end
 
-  class VteStruct < FFI::ManagedStruct
-    layout :ref, :ulong
-
-    def self.release(ptr)
-      TSM::Bindings.tsm_vte_unref(ptr)
-    end
-  end
-
   class Vte
     attr_reader :screen
 
@@ -44,6 +36,10 @@ module TSM
       call(:input, mem_buf, size)
     end
 
+    def release
+      TSM::Bindings.tsm_vte_unref(@pointer)
+    end
+
     private
 
     def create_vte
@@ -52,7 +48,7 @@ module TSM
       ret = TSM::Bindings.tsm_vte_new(vte_ptr, screen.pointer, @write_callback,
                                       nil, nil, nil)
       raise "Couldn't create screen" unless ret.zero?
-      @pointer = VteStruct.new(vte_ptr.get_pointer(0)) #vte_ptr.get_pointer(0)
+      @pointer = vte_ptr.get_pointer(0)
     end
 
     def call(function, *args)

@@ -37,14 +37,6 @@ module TSM
     attach_function :tsm_screen_unref, [:pointer], :void
   end
 
-  class ScreenStruct < FFI::ManagedStruct
-    layout :ref, :size_t
-
-    def self.release(ptr)
-      TSM::Bindings.tsm_screen_unref(ptr)
-    end
-  end
-
   class Screen
     FLAG_HIDE_CURSOR = 0x10
 
@@ -79,13 +71,17 @@ module TSM
       call(:draw, nil, callback, nil, nil)
     end
 
+    def release
+      TSM::Bindings.tsm_screen_unref(@pointer)
+    end
+
     private
 
     def create_screen
       screen_ptr = FFI::MemoryPointer.new(:pointer)
       ret = TSM::Bindings.tsm_screen_new(screen_ptr, nil, nil)
       raise "Couldn't create screen" unless ret.zero?
-      @pointer = ScreenStruct.new(screen_ptr.get_pointer(0))
+      @pointer = screen_ptr.get_pointer(0)
     end
 
     def call(function, *args)
