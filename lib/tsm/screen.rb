@@ -32,6 +32,17 @@ module TSM
     attach_function :tsm_screen_draw, [:pointer, :screen_prepare_callback,
                                        :screen_draw_callback,
                                        :screen_render_callback, :pointer], :void
+
+    # void tsm_screen_unref(struct tsm_screen *screen);
+    attach_function :tsm_screen_unref, [:pointer], :void
+  end
+
+  class ScreenStruct < FFI::ManagedStruct
+    layout :ref, :size_t
+
+    def self.release(ptr)
+      TSM::Bindings.tsm_screen_unref(ptr)
+    end
   end
 
   class Screen
@@ -74,7 +85,7 @@ module TSM
       screen_ptr = FFI::MemoryPointer.new(:pointer)
       ret = TSM::Bindings.tsm_screen_new(screen_ptr, nil, nil)
       raise "Couldn't create screen" unless ret.zero?
-      @pointer = screen_ptr.get_pointer(0)
+      @pointer = ScreenStruct.new(screen_ptr.get_pointer(0))
     end
 
     def call(function, *args)

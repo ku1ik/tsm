@@ -10,6 +10,17 @@ module TSM
 
     # void tsm_vte_input(struct tsm_vte *vte, const char *u8, size_t len);
     attach_function :tsm_vte_input, [:pointer, :pointer, :size_t], :void
+
+    # void tsm_vte_unref(struct tsm_vte *vte);
+    attach_function :tsm_vte_unref, [:pointer], :void
+  end
+
+  class VteStruct < FFI::ManagedStruct
+    layout :ref, :ulong
+
+    def self.release(ptr)
+      TSM::Bindings.tsm_vte_unref(ptr)
+    end
   end
 
   class Vte
@@ -41,7 +52,7 @@ module TSM
       ret = TSM::Bindings.tsm_vte_new(vte_ptr, screen.pointer, @write_callback,
                                       nil, nil, nil)
       raise "Couldn't create screen" unless ret.zero?
-      @pointer = vte_ptr.get_pointer(0)
+      @pointer = VteStruct.new(vte_ptr.get_pointer(0)) #vte_ptr.get_pointer(0)
     end
 
     def call(function, *args)
