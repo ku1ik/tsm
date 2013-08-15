@@ -16,8 +16,8 @@ module TSM
         attribute.to_h
       end
 
-      it { should eq({ :fg => 1, :bg => 2, :bold => true,
-                       :underline => false, :inverse   => true }) }
+      it { should eq({ :fg => 1, :bg => 2, :bold => true, :underline => false,
+                       :inverse => true, :blink => false }) }
 
       describe ':fg' do
         subject { hash[:fg] }
@@ -93,6 +93,26 @@ module TSM
         context "when third bit is set" do
           before do
             struct[:flags] = 6 # second + third
+          end
+
+          it { should be(true) }
+        end
+      end
+
+      describe ':blink' do
+        subject { hash[:blink] }
+
+        context "when fifth bit is not set" do
+          before do
+            struct[:flags] = 15 # first four
+          end
+
+          it { should be(false) }
+        end
+
+        context "when fifth bit is set" do
+          before do
+            struct[:flags] = 17 # first + fifth
           end
 
           it { should be(true) }

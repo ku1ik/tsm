@@ -4,6 +4,8 @@ module TSM
     FLAG_BOLD      = 1
     FLAG_UNDERLINE = 2
     FLAG_INVERSE   = 4
+    FLAG_PROTECT   = 8
+    FLAG_BLINK     = 16
     RGB_LEVELS = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
 
     layout :fccode, :int8,
@@ -14,7 +16,7 @@ module TSM
            :br,     :uint8,
            :bg,     :uint8,
            :bb,     :uint8,
-           :flags,  :uint # bold, underline, inverse, protect (1 bit each)
+           :flags,  :uint # bold, underline, inverse, protect, blink (1 bit each)
 
     def to_h
       {
@@ -22,7 +24,8 @@ module TSM
         :bg        => bg,
         :bold      => bold?,
         :underline => underline?,
-        :inverse   => inverse?
+        :inverse   => inverse?,
+        :blink     => blink?
       }
     end
 
@@ -68,6 +71,10 @@ module TSM
 
     def inverse?
       flags & FLAG_INVERSE == FLAG_INVERSE
+    end
+
+    def blink?
+      flags & FLAG_BLINK == FLAG_BLINK
     end
 
     def color_from_rgb(r, g, b)
