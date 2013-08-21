@@ -1,12 +1,14 @@
 module TSM
 
-  class ScreenAttribute < FFI::Struct
+  ScreenAttribute = Struct.new(:fg, :bg, :bold?, :underline?, :inverse?, :blink?)
+
+  class ScreenAttributeStruct < FFI::Struct
     FLAG_BOLD      = 1
     FLAG_UNDERLINE = 2
     FLAG_INVERSE   = 4
     FLAG_PROTECT   = 8
     FLAG_BLINK     = 16
-    RGB_LEVELS = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
+    RGB_LEVELS     = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff]
 
     layout :fccode, :int8,
            :bccode, :int8,
@@ -18,22 +20,11 @@ module TSM
            :bb,     :uint8,
            :flags,  :uint # bold, underline, inverse, protect, blink (1 bit each)
 
-    def to_h
-      {
-        :fg        => fg,
-        :bg        => bg,
-        :bold      => bold?,
-        :underline => underline?,
-        :inverse   => inverse?,
-        :blink     => blink?
-      }
+    def to_screen_attribute
+      ScreenAttribute.new(fg, bg, bold?, underline?, inverse?, blink?)
     end
 
     private
-
-    def flags
-      self[:flags]
-    end
 
     def fg
       code = self[:fccode]
@@ -75,6 +66,10 @@ module TSM
 
     def blink?
       flags & FLAG_BLINK == FLAG_BLINK
+    end
+
+    def flags
+      self[:flags]
     end
 
     def color_from_rgb(r, g, b)

@@ -3,24 +3,13 @@ require 'spec_helper'
 module TSM
 
   describe ScreenAttribute do
-    let(:attribute) { ScreenAttribute.new }
-    let(:struct) { { :fccode => 1, :bccode => 2, :flags => 5} }
+    let(:struct) { ScreenAttributeStruct.new }
 
-    describe '#to_h' do
+    describe '#to_screen_attribute' do
+      let(:attribute) { struct.to_screen_attribute }
 
-      subject(:hash) do
-        struct.each do |name, value|
-          attribute[name] = value
-        end
-
-        attribute.to_h
-      end
-
-      it { should eq({ :fg => 1, :bg => 2, :bold => true, :underline => false,
-                       :inverse => true, :blink => false }) }
-
-      describe ':fg' do
-        subject { hash[:fg] }
+      describe 'fg' do
+        subject { attribute.fg }
 
         before do
           struct[:fccode] = 5
@@ -29,8 +18,8 @@ module TSM
         it { should eq(5) }
       end
 
-      describe ':bg' do
-        subject { hash[:bg] }
+      describe 'bg' do
+        subject { attribute.bg }
 
         before do
           struct[:bccode] = 7
@@ -39,8 +28,8 @@ module TSM
         it { should eq(7) }
       end
 
-      describe ':bold' do
-        subject { hash[:bold] }
+      describe 'bold?' do
+        subject { attribute.bold? }
 
         context "when first bit is not set" do
           before do
@@ -59,8 +48,8 @@ module TSM
         end
       end
 
-      describe ':underline' do
-        subject { hash[:underline] }
+      describe 'underline?' do
+        subject { attribute.underline? }
 
         context "when second bit is not set" do
           before do
@@ -79,8 +68,8 @@ module TSM
         end
       end
 
-      describe ':inverse' do
-        subject { hash[:inverse] }
+      describe 'inverse?' do
+        subject { attribute.inverse? }
 
         context "when third bit is not set" do
           before do
@@ -99,8 +88,8 @@ module TSM
         end
       end
 
-      describe ':blink' do
-        subject { hash[:blink] }
+      describe 'blink?' do
+        subject { attribute.blink? }
 
         context "when fifth bit is not set" do
           before do

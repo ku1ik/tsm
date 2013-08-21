@@ -5,7 +5,7 @@ module TSM
     callback :screen_prepare_callback, [:pointer, :pointer], :int
     callback :screen_draw_callback, [:pointer, :uint32, :pointer, :size_t,
                                      :uint, :uint, :uint,
-                                     ScreenAttribute.by_ref, :pointer],
+                                     ScreenAttributeStruct.by_ref, :pointer],
                                      :int
     callback :screen_render_callback, [:pointer, :pointer], :int
 
@@ -60,11 +60,10 @@ module TSM
     end
 
     def draw(&block)
-      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr_struct, data|
+      callback = proc do |screen, id, ch_ptr, len, width, posx, posy, attr, data|
         unicode_codepoint = ch_ptr.get_uint32(0)
         char = unicode_codepoint == 0 ? ' ' : [unicode_codepoint].pack('U*')
-        attr = attr_struct.to_h
-        yield(posx, posy, char, attr)
+        yield(posx, posy, char, attr.to_screen_attribute)
         0
       end
 

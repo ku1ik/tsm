@@ -118,7 +118,7 @@ module TSM
     end
 
     describe 'with a 256-color mode foreground color' do
-      subject { color_output[0][0][1][:fg] }
+      subject { color_output[0][0][1].fg }
 
       before do
         vte.input("\x1b[38;5;#{color_code}mX")
@@ -134,7 +134,7 @@ module TSM
     end
 
     describe 'with a 256-color mode background color' do
-      subject { color_output[0][0][1][:bg] }
+      subject { color_output[0][0][1].bg }
 
       before do
         vte.input("\x1b[48;5;#{color_code}mX")
